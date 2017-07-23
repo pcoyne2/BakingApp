@@ -15,7 +15,7 @@ public class RecipesSingleton {
     private List<Recipe> recipeList;
 
     public static RecipesSingleton get(Context context){
-        if(recipesSingleton != null){
+        if(recipesSingleton == null){
             recipesSingleton = new RecipesSingleton(context);
         }
         return recipesSingleton;

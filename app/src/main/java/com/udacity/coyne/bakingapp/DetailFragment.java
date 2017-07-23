@@ -1,4 +1,13 @@
 package com.udacity.coyne.bakingapp;
+
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
+
+/**
+ * Created by Patrick Coyne on 7/23/2017.
+ */
+
+
 /*
 Copyright (c) 2016 Amanda Hill and thoughtbot, inc.
 
@@ -20,30 +29,11 @@ Copyright (c) 2016 Amanda Hill and thoughtbot, inc.
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         THE SOFTWARE.
 */
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+public class DetailFragment extends Fragment {
 
-public class DetailActivity extends SingleFragmentActivity {
+    private RecyclerView ingredientRv;
+    private RecyclerView stepsRv;
+//    private
 
-    @Override
-    protected Fragment createFragment() {
-        return new DetailFragment();
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
-
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id.fragment_container);
-        if(fragment == null){
-            fragment = createFragment();
-            fm.beginTransaction()
-                    .add(R.id.fragment_container, fragment)
-                    .commit();
-        }
-    }
 }
+

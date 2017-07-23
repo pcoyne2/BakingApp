@@ -20,6 +20,9 @@
         </activity>
         <activity android:name=".DetailActivity">
         </activity>
+        <activity android:name=".StepsPagerActivity"
+                  android:parentActivityName=".RecipesListActivity">
+        </activity>
     </application>
 
 </manifest>
