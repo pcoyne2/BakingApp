@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,7 @@ public class StepsPagerActivity extends AppCompatActivity{
 
     private ViewPager viewPager;
     private List<Steps> stepsList;
-
+    Fragment fragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,12 +35,14 @@ public class StepsPagerActivity extends AppCompatActivity{
 
         viewPager = (ViewPager)findViewById(R.id.steps_view_pager);
         FragmentManager fm = getSupportFragmentManager();
-        viewPager.setAdapter(new FragmentStatePagerAdapter(fm) {
+        viewPager.setAdapter(new FragmentPagerAdapter(fm) {
             @Override
             public Fragment getItem(int position) {
                 Steps step = stepsList.get(position);
-                return StepsFragment.newInstance(recipeId, step.getId());
+                fragment = StepsFragment.newInstance(recipeId, step.getId());
+                return fragment;
             }
+
 
             @Override
             public int getCount() {
@@ -48,6 +51,7 @@ public class StepsPagerActivity extends AppCompatActivity{
         });
 
         viewPager.setCurrentItem(stepId);
+
     }
 
     public static Intent newIntent(Context context, int crimeId, int stepId){

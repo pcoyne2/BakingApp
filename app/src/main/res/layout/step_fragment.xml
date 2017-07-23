@@ -3,6 +3,15 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
+    
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        android:id="@+id/player_view"
+        android:layout_margin="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="300dp">
+        
+    </com.google.android.exoplayer2.ui.SimpleExoPlayerView>
+
     <TextView
         android:id="@+id/step_text"
         android:layout_width="wrap_content"
