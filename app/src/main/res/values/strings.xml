@@ -2,4 +2,17 @@
     <string name="app_name">UdacityBakingApp</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+    <string name="test_detail">
+        350.0G Bittersweet chocolate (60-70% cacao)
+226.0G unsalted butter
+300.0G granulated sugar
+100.0G light brown sugar
+5.0UNIT large eggs
+1.0TBLSP vanilla extract
+140.0G all purpose flour
+40.0G cocoa powder
+1.5TSP salt
+350.0G semisweet chocolate chips
+
+    </string>
 </resources>
