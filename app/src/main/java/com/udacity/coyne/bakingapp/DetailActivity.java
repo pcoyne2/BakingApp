@@ -20,30 +20,39 @@ Copyright (c) 2016 Amanda Hill and thoughtbot, inc.
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         THE SOFTWARE.
 */
+import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class DetailActivity extends SingleFragmentActivity {
+public class DetailActivity extends AppCompatActivity {
 
-    @Override
-    protected Fragment createFragment() {
-        return new DetailFragment();
-    }
+    private Recipe recipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fragment);
 
+        final int recipeId = getIntent().getIntExtra("recipe_id", 1);
+
+        recipe = RecipesSingleton.get(this).getRecipe(recipeId);
+
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
         if(fragment == null){
-            fragment = createFragment();
+            fragment = DetailFragment.newInstance(recipeId);
             fm.beginTransaction()
                     .add(R.id.fragment_container, fragment)
                     .commit();
         }
+    }
+
+    public static Intent newIntent(Context context, int recipeId){
+        Intent intent = new Intent(context, DetailActivity.class);
+        intent.putExtra("recipe_id", recipeId);
+        return intent;
     }
 }

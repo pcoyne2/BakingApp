@@ -63,7 +63,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
         @Override
         public void onClick(View view) {
-            Intent intent = StepsPagerActivity.newIntent(context, recipe.getId(), 0);
+            Intent intent = DetailActivity.newIntent(context, recipe.getId());
 //            Intent intent = new Intent(context, StepsPagerActivity.class);
 //            intent.putExtra("step_id", 0);
 //            intent.putExtra("crime_id", recipe.getId());
