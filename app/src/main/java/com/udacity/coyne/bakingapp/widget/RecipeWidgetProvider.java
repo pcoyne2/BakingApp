@@ -39,7 +39,7 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 //        for (int appWidgetId : appWidgetIds) {
 //            updateAppWidget(context, appWidgetManager, appWidgetId);
 //        }
-        RecipeService.startActionUpdateWidget(context);
+        RecipeService.startActionUpdateWidget(context, 0);
     }
 
     public static void updateRecipeWidget(Context context, AppWidgetManager appWidgetManager,

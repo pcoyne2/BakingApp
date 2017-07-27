@@ -82,7 +82,7 @@ public class DetailFragment extends Fragment {
                     ingredient.getMeasure() + " "+ ingredient.getIngredient()+ "\n";
         }
         ingredients.setText(ingredientsText);
-        RecipeService.startActionUpdateWidget(getActivity());
+        RecipeService.startActionUpdateWidget(getActivity(), recipe.getId());
 
         stepsRv = (RecyclerView)view.findViewById(R.id.steps_recycler_view);
         stepsRv.setLayoutManager(new LinearLayoutManager(getActivity()));

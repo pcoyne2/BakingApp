@@ -11,6 +11,12 @@
         android:layout_height="300dp">
         
     </com.google.android.exoplayer2.ui.SimpleExoPlayerView>
+    <ImageView
+        android:id="@+id/step_image"
+        android:layout_margin="8dp"
+        android:layout_width="match_parent"
+        android:src="@android:drawable/stat_notify_error"
+        android:layout_height="300dp"/>
 
     <TextView
         android:id="@+id/step_text"

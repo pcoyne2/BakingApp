@@ -1,5 +1,6 @@
 package com.udacity.coyne.bakingapp;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +16,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class RecipesListActivity extends SingleFragmentActivity {
+public class RecipesListActivity extends SingleFragmentActivity implements RecipeAdapter.Callbacks{
 
 //    private RecyclerView recyclerView;
 //    private ArrayList<Recipe> recipeList;
@@ -42,6 +43,19 @@ public class RecipesListActivity extends SingleFragmentActivity {
         }
 
 //        initViews();
+    }
+
+    @Override
+    public void onRecipeSelected(Recipe recipe) {
+        if(findViewById(R.id.detail_fragment_container) == null){
+            Intent intent = DetailActivity.newIntent(this, recipe.getId());
+            startActivity(intent);
+        }else{
+            Fragment detail = DetailFragment.newInstance(recipe.getId());
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_fragment_container, detail)
+                    .commit();
+        }
     }
 
 //    private void initViews(){

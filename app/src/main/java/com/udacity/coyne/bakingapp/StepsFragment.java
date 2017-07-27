@@ -1,5 +1,6 @@
 package com.udacity.coyne.bakingapp;
 
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -33,6 +35,9 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
+
+import static android.view.View.GONE;
 
 
 /**
@@ -53,6 +58,7 @@ public class StepsFragment extends Fragment {
     private SimpleExoPlayer player;
     private ExoPlayer.EventListener exoEventListener;
     private Uri videoUri;
+    private ImageView thumbnail;
 
     public static StepsFragment newInstance(int recipesId, int stepsId){
         Bundle args = new Bundle();
@@ -81,6 +87,7 @@ public class StepsFragment extends Fragment {
         View view = inflater.inflate(R.layout.step_fragment, container, false);
         textView = view.findViewById(R.id.step_text);
         textView.setText(step.getDescription()+" "+step.getThumbnailURL() + " "+step.getVideoURL());
+        thumbnail = (ImageView)view.findViewById(R.id.step_image);
 
         simpleExoPlayerView = new SimpleExoPlayerView(getActivity());
         simpleExoPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
@@ -88,10 +95,18 @@ public class StepsFragment extends Fragment {
         videoUri = null;
         if(!step.getVideoURL().equals("")) {
             videoUri = Uri.parse(step.getVideoURL());
+            thumbnail.setVisibility(GONE);
         }else if(!step.getThumbnailURL().equals("")){// If this were an image put imageview but also contains mp4
-            videoUri = Uri.parse(step.getThumbnailURL());
+            if(step.getThumbnailURL().contains("mp4")){
+                videoUri = Uri.parse(step.getThumbnailURL());
+                thumbnail.setVisibility(GONE);
+            }else{
+                simpleExoPlayerView.setVisibility(GONE);
+                Picasso.with(getActivity()).load(step.getThumbnailURL()).into(thumbnail);
+            }
         }else{
-            simpleExoPlayerView.setVisibility(View.GONE);
+            simpleExoPlayerView.setVisibility(GONE);
+            thumbnail.setVisibility(GONE);
         }
 
         return view;

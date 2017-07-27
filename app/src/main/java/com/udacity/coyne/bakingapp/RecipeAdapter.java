@@ -19,10 +19,12 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     private ArrayList<Recipe> mRecipes;
     private Context context;
+    private Callbacks mCallback;
 
     public RecipeAdapter(Context context, ArrayList<Recipe> recipes) {
         this.context = context;
         mRecipes = recipes;
+        mCallback = (Callbacks) context;
     }
 
     @Override
@@ -37,6 +39,10 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         holder.ingredients.setText("Ingredients: "+mRecipes.get(position).getIngredients().size());
         holder.serving_size.setText("Servings: "+mRecipes.get(position).getServings());
         holder.bind(mRecipes.get(position));
+    }
+
+    public interface Callbacks{
+        void onRecipeSelected(Recipe recipe);
     }
 
     @Override
@@ -63,11 +69,9 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
         @Override
         public void onClick(View view) {
-            Intent intent = DetailActivity.newIntent(context, recipe.getId());
-//            Intent intent = new Intent(context, StepsPagerActivity.class);
-//            intent.putExtra("step_id", 0);
-//            intent.putExtra("crime_id", recipe.getId());
-            context.startActivity(intent);
+//            Intent intent = DetailActivity.newIntent(context, recipe.getId());
+//            context.startActivity(intent);
+            mCallback.onRecipeSelected(recipe);
 //            context.startActivity(new Intent());
         }
     }
