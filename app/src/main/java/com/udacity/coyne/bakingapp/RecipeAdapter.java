@@ -6,8 +6,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -38,6 +41,12 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         holder.recipe_name.setText(mRecipes.get(position).getName());
         holder.ingredients.setText("Ingredients: "+mRecipes.get(position).getIngredients().size());
         holder.serving_size.setText("Servings: "+mRecipes.get(position).getServings());
+        if(!mRecipes.get(position).getImage().isEmpty()){
+            Picasso.with(context).load(mRecipes.get(position).getImage()).into(holder.recipe_image);
+        }else{
+//            holder.recipe_image.setImageResource(R.drawable.example_appwidget_preview);
+            holder.recipe_image.setVisibility(View.GONE);
+        }
         holder.bind(mRecipes.get(position));
     }
 
@@ -52,6 +61,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView recipe_name, serving_size, ingredients;
+        private ImageView recipe_image;
         private Recipe recipe;
         public ViewHolder(View view) {
             super(view);
@@ -60,6 +70,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
             recipe_name = (TextView)view.findViewById(R.id.recipe_name);
             ingredients = (TextView)view.findViewById(R.id.ingredients);
             serving_size = (TextView)view.findViewById(R.id.servings);
+            recipe_image = (ImageView)view.findViewById(R.id.recipe_image);
 
         }
 

@@ -11,9 +11,9 @@ import android.support.v7.app.AppCompatActivity;
  * Created by Patrick Coyne on 7/10/2017.
  */
 
-public abstract class SingleFragmentActivity extends AppCompatActivity {
+//public abstract class SingleFragmentActivity extends AppCompatActivity {
 
-    protected abstract Fragment createFragment();
+/*    protected abstract Fragment createFragment();
 
     @LayoutRes
     protected int getLayoutResId(){
@@ -33,5 +33,5 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
                     .add(R.id.fragment_container, fragment)
                     .commit();
         }
-    }
-}
+    }*/
+//}

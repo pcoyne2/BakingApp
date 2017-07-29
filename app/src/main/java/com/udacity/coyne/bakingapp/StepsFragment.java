@@ -1,5 +1,6 @@
 package com.udacity.coyne.bakingapp;
 
+import android.content.Context;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,9 +11,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -59,6 +62,13 @@ public class StepsFragment extends Fragment {
     private ExoPlayer.EventListener exoEventListener;
     private Uri videoUri;
     private ImageView thumbnail;
+    private ImageButton back, forward;
+
+    private Callbacks callbacks;
+
+
+    private int resumeWindow;
+    private long resumePosition;
 
     public static StepsFragment newInstance(int recipesId, int stepsId){
         Bundle args = new Bundle();
@@ -109,6 +119,22 @@ public class StepsFragment extends Fragment {
             thumbnail.setVisibility(GONE);
         }
 
+        back = (ImageButton)view.findViewById(R.id.back_button);
+        forward = (ImageButton)view.findViewById(R.id.forward_button);
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                callbacks.onPrevButtonClicked();
+            }
+        });
+        forward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                callbacks.onNextButtonClicked();
+            }
+        });
+
         return view;
     }
 
@@ -122,6 +148,11 @@ public class StepsFragment extends Fragment {
         }else{
             StopExoPlayer();
         }
+    }
+
+    public interface Callbacks{
+        public void onNextButtonClicked();
+        public void onPrevButtonClicked();
     }
 
     private void SetupExoPlayer(){
@@ -153,7 +184,13 @@ public class StepsFragment extends Fragment {
         final MediaSource mediaSource = new ExtractorMediaSource(videoUri,
                 dataSourceFactory, extractorsFactory, null, null);
 // Prepare the player with the source.
-        player.prepare(mediaSource);
+
+        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+        if (haveResumePosition) {
+            player.seekTo(resumeWindow, resumePosition);
+        }
+
+        player.prepare(mediaSource, !haveResumePosition, false);
         //loopingSource);
 
         player.addListener(new ExoPlayer.EventListener() {
@@ -178,6 +215,7 @@ public class StepsFragment extends Fragment {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 Log.v(TAG,"Listener-onPlayerStateChanged...");
+                player.setPlayWhenReady(playWhenReady);
 
             }
 
@@ -214,13 +252,30 @@ public class StepsFragment extends Fragment {
         if(videoUri != null) {
             SetupExoPlayer();
         }
+        callbacks = (Callbacks) getActivity();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         if(player != null){
+            updateResumePosition();
             player.release();
+        }
+        callbacks = null;
+    }
+
+    private void updateResumePosition() {
+        resumeWindow = player.getCurrentWindowIndex();
+        resumePosition = player.isCurrentWindowSeekable() ? Math.max(0, player.getCurrentPosition())
+                : C.TIME_UNSET;
+    }
+
+    private void releasePlayer() {
+        if (player != null) {
+            updateResumePosition();
+            player.release();
+            player = null;
         }
     }
 }

@@ -16,18 +16,18 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class RecipesListActivity extends SingleFragmentActivity implements RecipeAdapter.Callbacks{
+public class RecipesListActivity extends AppCompatActivity implements RecipeAdapter.Callbacks{
 
 //    private RecyclerView recyclerView;
 //    private ArrayList<Recipe> recipeList;
 //    private RecipeAdapter adapter;
 
 
-    @Override
-    protected Fragment createFragment() {
-        return new RecipesListFragment();
-    }
-
+//    @Override
+//    protected Fragment createFragment() {
+//        return new RecipesListFragment();
+//    }
+//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,9 +36,10 @@ public class RecipesListActivity extends SingleFragmentActivity implements Recip
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
         if(fragment == null){
-            fragment = createFragment();
+            fragment = new RecipesListFragment();
             fm.beginTransaction()
-                    .add(R.id.fragment_container, fragment)
+                    .replace(R.id.fragment_container, fragment)
+//                    .add(R.id.fragment_container, fragment)
                     .commit();
         }
 

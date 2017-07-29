@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
               android:layout_height="match_parent">
-    
+
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/player_view"
         android:layout_margin="8dp"
         android:layout_width="match_parent"
         android:layout_height="300dp">
-        
+
     </com.google.android.exoplayer2.ui.SimpleExoPlayerView>
     <ImageView
         android:id="@+id/step_image"
@@ -22,6 +21,23 @@
         android:id="@+id/step_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World"/>
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:text="Hello World"
+        android:layout_below="@id/player_view"/>
 
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/back_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_media_previous"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"/>
+    <ImageButton
+        android:id="@+id/forward_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_media_next"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

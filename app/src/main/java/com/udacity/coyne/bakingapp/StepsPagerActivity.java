@@ -9,6 +9,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 import java.util.List;
 
@@ -16,7 +19,7 @@ import java.util.List;
  * Created by Patrick Coyne on 7/23/2017.
  */
 
-public class StepsPagerActivity extends AppCompatActivity{
+public class StepsPagerActivity extends AppCompatActivity implements StepsFragment.Callbacks{
 
     private ViewPager viewPager;
     private List<Steps> stepsList;
@@ -52,6 +55,32 @@ public class StepsPagerActivity extends AppCompatActivity{
 
         viewPager.setCurrentItem(stepId);
 
+//        back = (ImageButton)findViewById(R.id.back_button);
+//        forward = (ImageButton)findViewById(R.id.forward_button);
+//
+//        back.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                int newPage = getItem(-1);
+//                if(newPage >= 0) {
+//                    viewPager.setCurrentItem(newPage);
+//                }
+//            }
+//        });
+//        forward.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                int newPage = getItem(1);
+//                if(newPage < viewPager.getAdapter().getCount()) {
+//                    viewPager.setCurrentItem(newPage);
+//                }
+//            }
+//        });
+
+    }
+
+    private int getItem(int i) {
+        return viewPager.getCurrentItem() + i;
     }
 
     public static Intent newIntent(Context context, int crimeId, int stepId){
@@ -59,5 +88,21 @@ public class StepsPagerActivity extends AppCompatActivity{
         intent.putExtra("recipe_id", crimeId);
         intent.putExtra("step_id", stepId);
         return intent;
+    }
+
+    @Override
+    public void onNextButtonClicked() {
+        int newPage = getItem(1);
+        if(newPage < viewPager.getAdapter().getCount()) {
+            viewPager.setCurrentItem(newPage);
+        }
+    }
+
+    @Override
+    public void onPrevButtonClicked() {
+        int newPage = getItem(-1);
+        if(newPage >= 0) {
+            viewPager.setCurrentItem(newPage);
+        }
     }
 }

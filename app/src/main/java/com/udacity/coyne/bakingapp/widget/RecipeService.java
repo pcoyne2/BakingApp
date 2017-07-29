@@ -43,14 +43,18 @@ public class RecipeService extends IntentService {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, RecipeWidgetProvider.class));
 
-        List<Recipe> recipeList = RecipesSingleton.get(this).getRecipeList();
-        List<Ingredients> ingredientsArrayList = recipeList.get(id-1).getIngredients();//Id starts at 1 list starts 0
-        // End up with index out of bounds and wrong recipe
         String ingredientsText = "";
-        for(int i=0; i<ingredientsArrayList.size();i++){
-            Ingredients ingredient = ingredientsArrayList.get(i);
-            ingredientsText = ingredientsText + ingredient.getQuantity() + "" +
-                    ingredient.getMeasure() + " "+ ingredient.getIngredient()+ "\n";
+
+        List<Recipe> recipeList = RecipesSingleton.get(this).getRecipeList();
+        if(recipeList!=null && recipeList.size()>(id-1) && (id-1)>=0) {
+            List<Ingredients> ingredientsArrayList = recipeList.get(id-1).getIngredients();//Id starts at 1 list starts 0
+            // End up with index out of bounds and wrong recipe
+
+            for (int i = 0; i < ingredientsArrayList.size(); i++) {
+                Ingredients ingredient = ingredientsArrayList.get(i);
+                ingredientsText = ingredientsText + ingredient.getQuantity() + "" +
+                        ingredient.getMeasure() + " " + ingredient.getIngredient() + "\n";
+            }
         }
         RecipeWidgetProvider.updateRecipeWidget(this, appWidgetManager, ingredientsText, appWidgetIds);
     }

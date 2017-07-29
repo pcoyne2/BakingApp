@@ -39,8 +39,30 @@ public class RecipesListActivityTest {
 
     @Test
     public void recipesListActivityTest() {
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         onView(withId(R.id.card_recycler_view)).perform(
                 scrollToPosition(0), actionOnItemAtPosition(0, click())
         );
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        pressBack();
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
