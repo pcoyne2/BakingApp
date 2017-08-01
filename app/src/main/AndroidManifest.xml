@@ -26,7 +26,8 @@
             android:name=".StepsPagerActivity"
             android:parentActivityName=".DetailActivity">
         </activity>
-        <service android:name=".widget.RecipeService"/>
+        <service android:name=".widget.RecipeService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
         <receiver android:name=".widget.RecipeWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
