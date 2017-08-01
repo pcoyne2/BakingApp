@@ -24,17 +24,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class DetailActivity extends AppCompatActivity {
+import java.util.List;
+
+public class DetailActivity extends AppCompatActivity implements StepsAdapter.Callbacks, StepsFragment.Callbacks{
 
     private Recipe recipe;
+    private ViewPager viewPager;
+    private List<Steps> stepsList;
+//    Fragment fragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
+        setContentView(R.layout.activity_masterdetail);
 
         final int recipeId = getIntent().getIntExtra("recipe_id", 1);
 
@@ -48,11 +56,73 @@ public class DetailActivity extends AppCompatActivity {
                     .add(R.id.fragment_container, fragment)
                     .commit();
         }
+
+        if(findViewById(R.id.steps_view_pager) != null) {
+            stepsList = RecipesSingleton.get(this).getRecipe(recipeId).getSteps();
+
+            viewPager = (ViewPager) findViewById(R.id.steps_view_pager);
+            viewPager.setAdapter(new FragmentPagerAdapter(fm) {
+                @Override
+                public Fragment getItem(int position) {
+                    Steps step = stepsList.get(position);
+                    Fragment fragment = StepsFragment.newInstance(recipeId, step.getId());
+                    return fragment;
+                }
+
+
+                @Override
+                public int getCount() {
+                    return stepsList.size();
+                }
+            });
+
+            viewPager.setCurrentItem(stepsList.get(0).getId());
+        }
     }
+
+
 
     public static Intent newIntent(Context context, int recipeId){
         Intent intent = new Intent(context, DetailActivity.class);
         intent.putExtra("recipe_id", recipeId);
         return intent;
+    }
+
+    @Override
+    public void onStepSelected(Recipe recipe, Steps step) {
+        if(findViewById(R.id.steps_view_pager) == null){
+            Intent intent = StepsPagerActivity.newIntent(this, recipe.getId(), step.getId());
+//            Intent intent = new Intent(context, StepsPagerActivity.class);
+//            intent.putExtra("step_id", 0);
+//            intent.putExtra("crime_id", recipe.getId());
+            startActivity(intent);
+        }else{
+            viewPager.setCurrentItem(step.getId());
+        }
+
+    }
+    private int getItem(int i) {
+        return viewPager.getCurrentItem() + i;
+    }
+
+
+    @Override
+    public void onNextButtonClicked() {
+        if(findViewById(R.id.steps_view_pager) != null) {
+            int newPage = getItem(1);
+            if (newPage < viewPager.getAdapter().getCount()) {
+                viewPager.setCurrentItem(newPage);
+            }
+        }
+    }
+
+    @Override
+    public void onPrevButtonClicked() {
+        if(findViewById(R.id.steps_view_pager) != null) {
+            int newPage = getItem(-1);
+            if (newPage >= 0) {
+                viewPager.setCurrentItem(newPage);
+            }
+        }
     }
 }

@@ -19,11 +19,13 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
     private List<Steps> stepsList;
     private Context context;
     private Recipe recipe;
+    private Callbacks callbacks;
 
     public StepsAdapter(List<Steps> stepsList, Context context, Recipe recipe) {
         this.stepsList = stepsList;
         this.context = context;
         this.recipe = recipe;
+        callbacks = (Callbacks)context;
     }
 
     @Override
@@ -42,6 +44,10 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
     @Override
     public int getItemCount() {
         return stepsList.size();
+    }
+
+    public interface Callbacks{
+        void onStepSelected(Recipe recipe, Steps step);
     }
 
     public class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -63,11 +69,12 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
 
         @Override
         public void onClick(View view) {
-            Intent intent = StepsPagerActivity.newIntent(context, recipe.getId(), step.getId());
+//            Intent intent = StepsPagerActivity.newIntent(context, recipe.getId(), step.getId());
 //            Intent intent = new Intent(context, StepsPagerActivity.class);
 //            intent.putExtra("step_id", 0);
 //            intent.putExtra("crime_id", recipe.getId());
-            context.startActivity(intent);
+//            context.startActivity(intent);
+            callbacks.onStepSelected(recipe, step);
 //            context.startActivity(new Intent());
         }
     }

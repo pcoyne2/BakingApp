@@ -48,15 +48,15 @@ public class RecipesListActivity extends AppCompatActivity implements RecipeAdap
 
     @Override
     public void onRecipeSelected(Recipe recipe) {
-        if(findViewById(R.id.detail_fragment_container) == null){
+//        if(findViewById(R.id.detail_fragment_container) == null){
             Intent intent = DetailActivity.newIntent(this, recipe.getId());
             startActivity(intent);
-        }else{
-            Fragment detail = DetailFragment.newInstance(recipe.getId());
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.detail_fragment_container, detail)
-                    .commit();
-        }
+//        }else{
+//            Fragment detail = DetailFragment.newInstance(recipe.getId());
+//            getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.detail_fragment_container, detail)
+//                    .commit();
+//        }
     }
 
 //    private void initViews(){

@@ -1,12 +1,14 @@
 package com.udacity.coyne.bakingapp;
 
-import android.content.Context;
-import android.media.Image;
+import android.content.res.Configuration;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +41,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.squareup.picasso.Picasso;
+import com.udacity.coyne.bakingapp.databinding.StepFragmentBinding;
 
 import static android.view.View.GONE;
 
@@ -47,7 +50,7 @@ import static android.view.View.GONE;
  * Created by Patrick Coyne on 7/23/2017.
  */
 
-public class StepsFragment extends Fragment {
+public class StepsFragment extends Fragment implements ExoPlayer.EventListener{
     private static final String ARG_STEPS_ID = "step_id";
     private static final String ARG_RECIPE_ID = "recipe_id";
     private static final String TAG = "StepsFragment";
@@ -56,13 +59,16 @@ public class StepsFragment extends Fragment {
     private Steps step;
     private Recipe recipe;
 
-    private TextView textView;
-    private SimpleExoPlayerView simpleExoPlayerView;
-    private SimpleExoPlayer player;
-    private ExoPlayer.EventListener exoEventListener;
+    private StepFragmentBinding binding;
+//    private TextView textView;
+//    private SimpleExoPlayerView simpleExoPlayerView;
+    private SimpleExoPlayer mExoPlayer;
+    private MediaSessionCompat mMediaSession;
+    private PlaybackStateCompat.Builder mStateBuilder;
+//    private ExoPlayer.EventListener exoEventListener;
     private Uri videoUri;
-    private ImageView thumbnail;
-    private ImageButton back, forward;
+//    private ImageView thumbnail;
+//    private ImageButton back, forward;
 
     private Callbacks callbacks;
 
@@ -94,41 +100,53 @@ public class StepsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.step_fragment, container, false);
-        textView = view.findViewById(R.id.step_text);
-        textView.setText(step.getDescription()+" "+step.getThumbnailURL() + " "+step.getVideoURL());
-        thumbnail = (ImageView)view.findViewById(R.id.step_image);
+        binding = DataBindingUtil.inflate(inflater, R.layout.step_fragment, container, false);
+        final View view = binding.getRoot();
+//        textView = view.findViewById(R.id.step_text);
+        binding.stepText.setText(step.getDescription());
+//        thumbnail = (ImageView)view.findViewById(R.id.step_image);
 
-        simpleExoPlayerView = new SimpleExoPlayerView(getActivity());
-        simpleExoPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
+//        simpleExoPlayerView = new SimpleExoPlayerView(getActivity());
+//        simpleExoPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.player_view);
 
         videoUri = null;
         if(!step.getVideoURL().equals("")) {
             videoUri = Uri.parse(step.getVideoURL());
-            thumbnail.setVisibility(GONE);
+            initializeMediaSession();
+            initializePlayer(videoUri);
+            binding.stepImage.setVisibility(GONE);
+            if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE &&
+                    !getResources().getBoolean(R.bool.isTablet)) {
+                binding.playerView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+                binding.playerView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                binding.backButton.setVisibility(GONE);
+                binding.forwardButton.setVisibility(GONE);
+            }
         }else if(!step.getThumbnailURL().equals("")){// If this were an image put imageview but also contains mp4
             if(step.getThumbnailURL().contains("mp4")){
                 videoUri = Uri.parse(step.getThumbnailURL());
-                thumbnail.setVisibility(GONE);
+                initializeMediaSession();
+                initializePlayer(videoUri);
+                binding.stepImage.setVisibility(GONE);
             }else{
-                simpleExoPlayerView.setVisibility(GONE);
-                Picasso.with(getActivity()).load(step.getThumbnailURL()).into(thumbnail);
+                binding.playerView.setVisibility(GONE);
+                Picasso.with(getActivity()).load(step.getThumbnailURL()).into(binding.stepImage);
             }
         }else{
-            simpleExoPlayerView.setVisibility(GONE);
-            thumbnail.setVisibility(GONE);
+            binding.playerView.setVisibility(GONE);
+            binding.stepImage.setVisibility(GONE);
         }
 
-        back = (ImageButton)view.findViewById(R.id.back_button);
-        forward = (ImageButton)view.findViewById(R.id.forward_button);
+//        back = (ImageButton)view.findViewById(R.id.back_button);
+//        forward = (ImageButton)view.findViewById(R.id.forward_button);
 
-        back.setOnClickListener(new View.OnClickListener() {
+        binding.backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 callbacks.onPrevButtonClicked();
             }
         });
-        forward.setOnClickListener(new View.OnClickListener() {
+        binding.forwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 callbacks.onNextButtonClicked();
@@ -138,144 +156,149 @@ public class StepsFragment extends Fragment {
         return view;
     }
 
+    private void initializeMediaSession() {
+        mMediaSession = new MediaSessionCompat(getContext(), TAG);
+        mMediaSession.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        mMediaSession.setMediaButtonReceiver(null);
+        mStateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackStateCompat.ACTION_PLAY |
+                                PlaybackStateCompat.ACTION_PAUSE |
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                                PlaybackStateCompat.ACTION_PLAY_PAUSE);
+
+        mMediaSession.setPlaybackState(mStateBuilder.build());
+        mMediaSession.setCallback(new MySessionCallback());
+        mMediaSession.setActive(true);
+    }
+
+    private void initializePlayer(Uri mediaUri) {
+        if (mExoPlayer == null) {
+            // Create an instance of the ExoPlayer.
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            LoadControl loadControl = new DefaultLoadControl();
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
+            binding.playerView.setPlayer(mExoPlayer);
+            mExoPlayer.addListener(this);
+            String userAgent = Util.getUserAgent(getContext(), "RecipeStepVideo");
+            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
+                    getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
+            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.setPlayWhenReady(true);
+        }
+    }
+
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser){
-//            if(videoUri != null) {
-//                SetupExoPlayer();
-//            }
-        }else{
-            StopExoPlayer();
+        if (this.isVisible()) {
+            if(!isVisibleToUser) {
+                if (mExoPlayer != null) {
+                    //Pause video when user swipes away in view pager
+                    mExoPlayer.setPlayWhenReady(false);
+                }
+            }
         }
     }
+
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if((playbackState == ExoPlayer.STATE_READY) && playWhenReady){
+            mStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
+                    mExoPlayer.getCurrentPosition(), 1f);
+        } else if((playbackState == ExoPlayer.STATE_READY)) {
+            mStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
+                    mExoPlayer.getCurrentPosition(), 1f);
+        }
+        mMediaSession.setPlaybackState(mStateBuilder.build());
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity() {
+
+    }
+
 
     public interface Callbacks{
         public void onNextButtonClicked();
         public void onPrevButtonClicked();
     }
 
-    private void SetupExoPlayer(){
-        Handler mainHandler = new Handler();
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-
-        // 2. Create a default LoadControl
-        LoadControl loadControl = new DefaultLoadControl();
-
-        // 3. Create the player
-        player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
-
-        //Set media controller
-        simpleExoPlayerView.setUseController(true);
-        simpleExoPlayerView.requestFocus();
-
-        // Bind the player to the view.
-        simpleExoPlayerView.setPlayer(player);
-
-        // Measures bandwidth during playback. Can be null if not required.
-        DefaultBandwidthMeter bandwidthMeterA = new DefaultBandwidthMeter();
-//Produces DataSource instances through which media data is loaded.
-        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(getActivity(), Util.getUserAgent(getActivity(), "exoplayer2example"), bandwidthMeterA);
-//Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-
-        final MediaSource mediaSource = new ExtractorMediaSource(videoUri,
-                dataSourceFactory, extractorsFactory, null, null);
-// Prepare the player with the source.
-
-        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
-        if (haveResumePosition) {
-            player.seekTo(resumeWindow, resumePosition);
-        }
-
-        player.prepare(mediaSource, !haveResumePosition, false);
-        //loopingSource);
-
-        player.addListener(new ExoPlayer.EventListener() {
-            @Override
-            public void onTimelineChanged(Timeline timeline, Object manifest) {
-                Log.v(TAG,"Listener-onTimelineChanged...");
-
-            }
-
-            @Override
-            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                Log.v(TAG,"Listener-onTracksChanged...");
-
-            }
-
-            @Override
-            public void onLoadingChanged(boolean isLoading) {
-                Log.v(TAG,"Listener-onLoadingChanged...");
-
-            }
-
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                Log.v(TAG,"Listener-onPlayerStateChanged...");
-                player.setPlayWhenReady(playWhenReady);
-
-            }
-
-            @Override
-            public void onPlayerError(ExoPlaybackException error) {
-                Log.v(TAG,"Listener-onPlayerError...");
-                player.stop();
-                player.prepare(mediaSource);
-                player.setPlayWhenReady(true);
-
-            }
-
-            @Override
-            public void onPositionDiscontinuity() {
-                Log.v(TAG,"Listener-onPositionDiscontinuity...");
-
-            }
-        });
-
-        player.setPlayWhenReady(false); //run file/link when ready to play.
-
-
-    }
-
-    public void StopExoPlayer(){
-        if(player != null){
-            player.stop();
-        }
-    }
 //
     @Override
     public void onResume() {
         super.onResume();
-        if(videoUri != null) {
-            SetupExoPlayer();
-        }
+//        if(videoUri != null) {
+////            SetupExoPlayer();
+//        }
         callbacks = (Callbacks) getActivity();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(player != null){
-            updateResumePosition();
-            player.release();
-        }
+//        if(mExoPlayer != null){
+            releasePlayer();
+//        }
         callbacks = null;
     }
 
-    private void updateResumePosition() {
-        resumeWindow = player.getCurrentWindowIndex();
-        resumePosition = player.isCurrentWindowSeekable() ? Math.max(0, player.getCurrentPosition())
-                : C.TIME_UNSET;
-    }
 
     private void releasePlayer() {
-        if (player != null) {
-            updateResumePosition();
-            player.release();
-            player = null;
+        if (mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+        if(mMediaSession!=null) {
+            mMediaSession.setActive(false);
+        }
+    }
+
+    private class MySessionCallback extends MediaSessionCompat.Callback {
+        @Override
+        public void onPlay() {
+            mExoPlayer.setPlayWhenReady(true);
+        }
+
+        @Override
+        public void onPause() {
+            mExoPlayer.setPlayWhenReady(false);
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            mExoPlayer.seekTo(0);
         }
     }
 }
