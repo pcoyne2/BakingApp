@@ -176,7 +176,7 @@ public class StepsFragment extends Fragment implements ExoPlayer.EventListener{
     }
 
     private void initializePlayer(Uri mediaUri) {
-        if (mExoPlayer == null) {
+//        if (mExoPlayer == null) {
             // Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
@@ -187,8 +187,8 @@ public class StepsFragment extends Fragment implements ExoPlayer.EventListener{
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
             mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
-        }
+            mExoPlayer.setPlayWhenReady(false);
+//        }
     }
 
     @Override
@@ -253,7 +253,7 @@ public class StepsFragment extends Fragment implements ExoPlayer.EventListener{
     public void onResume() {
         super.onResume();
 //        if(videoUri != null) {
-////            SetupExoPlayer();
+//            SetupExoPlayer();
 //        }
         callbacks = (Callbacks) getActivity();
     }
@@ -261,9 +261,10 @@ public class StepsFragment extends Fragment implements ExoPlayer.EventListener{
     @Override
     public void onPause() {
         super.onPause();
-//        if(mExoPlayer != null){
-            releasePlayer();
-//        }
+        if(mExoPlayer != null){
+//            releasePlayer();
+            mExoPlayer.setPlayWhenReady(false);
+        }
         callbacks = null;
     }
 
